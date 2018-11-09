@@ -1,7 +1,7 @@
 
 const express = require('express');
 const server = express();
-/* const actionRoutes = require('../actions/actionRoutes'); */
+ const actionRoutes = require('../actions/actionRoutes'); 
 const projectRoutes = require('../projects/projectRoutes');
 
 //MIDDLEWARE DECLARATIONS
@@ -14,10 +14,10 @@ server.use(cors());
 
 server.use(express.json());
 
-//USERS
-/* server.use('/actions', actionRoutes); */
+//ACTIONS
+server.use('/actions', actionRoutes); 
 
-//POSTS
+//PROJECTS
 server.use('/projects', projectRoutes);
 
 
