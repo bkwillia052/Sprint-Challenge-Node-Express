@@ -2,18 +2,15 @@ const express = require('express');
 const router = express.Router();
 const db = require('./projectModel');
 
-function allCap(req, res, next){
-    if(req.body.name)
-    {req.body.name = req.body.name.toUpperCase();}
-    next();
-}
 
+
+//GET ALL PROJECTS
 
 router.get('/', async (req, res)=>{
     
-    const users = await db.get();
+    const projects = await db.get();
     try{
-        res.status(200).json(users)
+        res.status(200).json(projects)
     }
     catch(er){
         res.status(500).json({message: 'There was an error retrieving the data'})
@@ -21,17 +18,19 @@ router.get('/', async (req, res)=>{
 
 });
 
+//GET PROJECT BY ID
+
 router.get('/:id', async (req, res)=>{
 
  let {id} = req.params;
- let user = await db.get(id);
+ let project = await db.get(id);
 
  try{
-     if(user){
-    res.status(200).json(user)
+     if(project){
+    res.status(200).json(project)
  }
  else{
-     res.status(404).json({message: 'User Not Found'})
+     res.status(404).json({message: 'Project Not Found'})
  }
 }
  catch(er){
@@ -39,39 +38,49 @@ router.get('/:id', async (req, res)=>{
  }
 })
 
-router.get('/:id/posts', async (req, res)=>{
+//GET A PROJECT'S ACTIONS
+
+router.get('/:id/actions', async (req, res)=>{
     let {id} = req.params;
-    let userPosts = await db.getUserPosts(id);
+    let projectActions = await db.getProjectActions(id);
 
     try{
-        res.status(200).json(userPosts);
+        res.status(200).json(projectActions);
     }
     catch(er){
         res.status(500).json({message: 'There was an error retrieving the data'})
     }
 });
 
+//ADD A PROJECT
 
-router.post('/', allCap, (req, res)=>{
+router.post('/', (req, res)=>{
     
-    let user = req.body;
+    let {name, description } = req.body;
+    let project = req.body;
     
-    db.insert(user)
+    if(name && description){
+    db.insert(project)
     .then(r => res.status(200).json(r))
     .catch(err => res.status(500).json({message: 'There was an error processing the data'}));
+    }
+    else{
+        res.status(400).json({message: 'Please try again with the correct parameters'})
+    }
 
 })
+//EDIT A PROJECT
 
-router.put('/:id', allCap, async (req, res)=>{
+router.put('/:id',  async (req, res)=>{
     let {id} = req.params;
-    let user = req.body; 
-    let prevName = await db.get(id);
-    let update = await db.update(id, user);
+    let project = req.body; 
+    
+    let update = await db.update(id, project);
     try{
         if(update)
         {res.status(200).json(update)}
         else{
-        res.status(404).json({message: 'User Not Found'})
+        res.status(404).json({message: 'Project Not Found'})
         }
     }
     catch(er){
@@ -82,24 +91,25 @@ router.put('/:id', allCap, async (req, res)=>{
 })
 
 
-
+//DELETE POST
 router.delete('/:id', async (req, res) => {
     let {id} = req.params;
-    let user = await db.get(id);
+    let project = await db.get(id);
     let deletion = await db.remove(id);
-
-    try{console.log(user)
-        if(user){
-        res.status(200).json(user)
+    console.log(deletion);
+    try{
+        
+        if(deletion){
+        res.status(200).json({message: 'Deleted Successfully'})
     }
         else{
-            res.status(404).json({message: 'User Not Found'})
+            res.status(404).json({message: 'Project Not Found'})
         }
 
     }
     catch(er){
-        if(!user){
-            res.status(404).json({message: 'User Not Found'})
+        if(!project){
+            res.status(404).json({message: 'Project Not Found'})
         }
         else{
         res.status(500).json({message: 'There was an error processing your request'})
@@ -107,3 +117,5 @@ router.delete('/:id', async (req, res) => {
     }
 
 })
+
+module.exports = router;
